@@ -1,20 +1,20 @@
 param(
-  $RunTests = $true,
-	$SaveResultsToWorkbooks = $false,
-	$UsePropertiesFile = $true,
+    $RunTests = $true,
+    $SaveResultsToWorkbooks = $false,
+    $UsePropertiesFile = $true,
     $WorkbooksProperties = "${HOME}\projects\workbooks.properties",
-	$WorkbooksId = '',
+    $WorkbooksId = '',
     $SharedKey = '',
     $LogType = 'tr',
-	$ResultsFolder = "${HOME}\projects\",
-	$Arguments = "-e SAMPLE_FILE=file.json -e VUS=1 -e ITERATIONS=1 -e SCENARIO=Scenario1",
-	$K6_Args = '',
-	$TestScript = 'script.js',
-	$K6From = 'system' ,
+    $ResultsFolder = "${HOME}\projects\",
+    $Arguments = "-e SAMPLE_FILE=file.json -e VUS=1 -e ITERATIONS=1 -e SCENARIO=Scenario1",
+    $K6_Args = '',
+    $TestScript = 'script.js',
+    $K6From = 'system' ,
     $BuildId = "$(Get-Date -Format 'yyyy_MM_dd_HH-mm-ss')",
     $BuildStatus = 'unknown',
     $PipelineId = "PC of ${env:username}",
-	$Mode = 'local PC'
+    $Mode = 'local PC'
 )
 
 $date = "$(Get-Date -Format 'MM_dd_yyyy_HH_mm')";
@@ -32,7 +32,7 @@ Function Invoke-K6(){
 Function Invoke-K6AsDocker(){
 	Write-Host "docker run --rm --entrypoint /bin/sh -i -v ${PWD}:/home/k6 loadimpact/k6 -c k6 run ${K6_Args}  ${Arguments} --include-system-env-vars=false --out csv=/home/k6/out.csv ${TestScript}"
 	(Get-Content -Path ${PSScriptRoot}/${TestScript}) | docker run --rm --entrypoint /bin/sh -i -v ${PWD}:/home/k6 loadimpact/k6 -c "k6 run ${K6_Args}  ${Arguments} --include-system-env-vars=false --out csv=/home/k6/out.csv ${TestScript}"
-  Copy-Item out.csv ${CSVFilenameAbsolutePath}
+    Copy-Item out.csv ${CSVFilenameAbsolutePath}
 }
 
 #Sends parsed results to workbooks by .properties or inline creds
