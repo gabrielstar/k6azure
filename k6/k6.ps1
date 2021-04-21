@@ -2,7 +2,7 @@ param(
   $RunTests = $true,
 	$SaveResultsToWorkbooks = $false,
 	$UsePropertiesFile = $true,
-	$WorkbooksProperties = "${HOME}\projects\workbooks.properties",
+    $WorkbooksProperties = "${HOME}\projects\workbooks.properties",
 	$WorkbooksId = '',
     $SharedKey = '',
     $LogType = 'tr',
