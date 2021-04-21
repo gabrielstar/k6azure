@@ -38,7 +38,7 @@ Function Invoke-K6AsDocker(){
 #Sends parsed results to workbooks by .properties or inline creds
 Function Save-ResultsToWorkbooks(){
 	$JMeterFormatFileName = "jmeter_${CSVFilename}"
-	$users = [regex]::Match($Argumentsó,'.*VUS=(\d+)').captures.groups[1].value; #extracts users from args stringó
+	$users = [regex]::Match($Arguments,'.*VUS=(\d+)').captures.groups[1].value; #extracts users from args stringó
 	Invoke-Expression "${PSScriptRoot}\tools\parse-tests-results.ps1 -resultsFile ${CSVFilename} -resultsPath ${ResultsFolder} -outputFile ${JMeterFormatFileName}"
 	If($UsePropertiesFile){ #use on local machine
 		Invoke-Expression "${PSScriptRoot}\tools\upload-to-workbooks.ps1 -WorkbooksProperties ${WorkbooksProperties} -FilePathCSV ${ResultsFolder}/${JMeterFormatFileName} -JmeterArg '$Arguments -Jthreads=$users' -BuildId $BuildId -PipelineId $PipelineId -Mode $Mode -BuildStatus $BuildStatus";
