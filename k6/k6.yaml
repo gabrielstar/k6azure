@@ -1,0 +1,85 @@
+name: $(BuildID)
+pr: none
+trigger: none
+
+parameters:
+  - name: Arguments
+    displayName: K6 user arguments passed to tests
+    default:  "-e SAMPLE_FILE=file.json -e VUS=1 -e ITERATIONS=1 -e SCENARIO=Scenario1"
+    type: string
+    values:
+      - "-e SAMPLE_FILE=file.json -e VUS=1 -e ITERATIONS=1 -e SCENARIO=Scenario1"
+      - "-e SAMPLE_FILE=file.json -e VUS=10 -e ITERATIONS=10 -e SCENARIO=Scenario1"
+
+  - name: WorkbooksUpload
+    displayName: Upload results to workbooks?
+    default: $false
+    type: string
+
+  - name: TimoutInMinutes
+    displayName: Agent Test run timeout
+    default: 60
+
+variables:
+  - name: checkoutPath
+    value: s/_tests
+  - name: baseAbsolutePath
+    value: $(Agent.BuildDirectory)/$(checkoutPath)
+  - name: testsRelativePathInRepo
+    value: k6
+jobs:
+  - job: K6
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    workspace:
+      clean: all
+    steps:
+      - checkout: self
+        clean: true
+        displayName: TESTS clone
+        path: $(checkoutPath)
+
+      - bash: |
+            if hash k6; then
+                echo "##[command] K6 installed"
+                k6 version
+                echo '##vso[task.setvariable variable=k6from]system'
+            elif hash docker; then
+                echo "##[command] K6 will be started as a docker container"
+                echo '##vso[task.setvariable variable=k6from]docker'
+                chmod -R 0777 $(baseAbsolutePath)/$(testsRelativePathInRepo)
+            else
+                echo "##[command] Installing k6 from package"
+                sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 379CE192D401AB61
+                echo "deb https://dl.bintray.com/loadimpact/deb stable main" | sudo tee -a /etc/apt/sources.list
+                sudo apt-get update
+                sudo apt-get install k6
+                echo '##vso[task.setvariable variable=k6from]system'
+            fi
+
+        displayName: Install k6
+
+      - task: PowerShell@2
+        displayName: k6 test
+        timeoutInMinutes: ${{ parameters.TimoutInMinutes }}
+        inputs:
+          workingDirectory: $(baseAbsolutePath)/$(testsRelativePathInRepo)
+          arguments: > # Use this to avoid newline characters in multiline string
+            -RunTests $true
+            -SaveResultsToWorkbooks ${{ parameters.WorkbooksUpload }}
+            -UsePropertiesFile $false
+            -WorkbooksId 'ReplaceMe'
+            -SharedKey 'ReplaceMe'
+            -LogType 'tr'
+            -ResultsFolder "$(baseAbsolutePath)"
+            -Arguments "${{ parameters.Arguments }}"
+            -K6From '$(k6from)'
+            -BuildId "$(Build.BuildId)"
+            -PipelineId "$(System.DefinitionId)"
+            -BuilStatus "$(Agent.JobStatus)"
+            -Mode 'Azure Agent'
+            -TestScript 'script.js'
+            -K6_Args '-q'
+          filePath: $(baseAbsolutePath)/$(testsRelativePathInRepo)/k6.ps1
+          pwsh: true
