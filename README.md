@@ -28,7 +28,7 @@ How to make most of it?
 
 ### Create DevOps pipeline (optional) and run everything from there
 
-1. Create pipeline from k6/k6.yaml. Pipeline will use an existing k6 installation or install k6 as a package or docker container if docker is available.
+1. Create pipeline from existing YAML file k6/k6.yaml. Pipeline will use an existing k6 installation or install k6 as a package or docker container if docker is available.
 2. If you want results to be saved to workbooks provide the following securely (e.g. as secrets from Library):
 
           
